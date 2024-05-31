@@ -13,3 +13,7 @@ npm install en carpeta frontend y correr: npm start
 
 conectar backend frontend:
 "proxy": "http://localhost:5000", en package.json
+
+
+para instalar reuirements:
+pip install -r requirements.txt
