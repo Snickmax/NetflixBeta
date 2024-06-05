@@ -1,16 +1,24 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import ReactDOM from 'react-dom';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
+import Form from './Form';
+import './Style.css';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
+
+function Main() {
+  const [showApp, setShowApp] = React.useState(true);
+
+  return (
+    <div>
+      {showApp ? <Form /> : <App />}
+      <button onClick={() => setShowApp(!showApp)}>Cambiar a {showApp ? 'App' : 'Form'}</button>
+    </div>
+  );
+}
+
+ReactDOM.render(
   <React.StrictMode>
-    <App />
-  </React.StrictMode>
+    <Main />
+  </React.StrictMode>,
+  document.getElementById('root')
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();

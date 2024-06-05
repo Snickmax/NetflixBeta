@@ -1,0 +1,20 @@
+.cartelera {
+  display: flex;
+  flex-wrap: wrap; /* Permite que los elementos se envuelvan en la siguiente línea si es necesario */
+  gap: 20px; /* Espacio entre las películas */
+  justify-content: center; /* Centra los elementos horizontalmente */
+}
+
+.movie {
+  flex: 1 1 200px; /* Permite que los elementos se estiren, pero con un tamaño mínimo de 200px */
+  text-align: center; /* Centra el texto dentro de cada tarjeta de película */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Agrega una sombra para un mejor efecto visual */
+  border-radius: 8px; /* Bordes redondeados */
+  padding: 10px; /* Espacio interno */
+  background-color: #fff; /* Fondo blanco */
+}
+
+header {
+    display: flex;
+    text-align: center;
+}

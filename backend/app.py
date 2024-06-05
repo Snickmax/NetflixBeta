@@ -19,25 +19,63 @@ neo4j_password = os.getenv("NEO4J_PASSWORD")
 # Crear una instancia de Driver para interactuar con la base de datos Neo4j
 driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_user, neo4j_password))
 
-def get_movie_recommendations(tx, user_id):
+def get_movie_nuevos_lanzamientos(tx):
     query = """
-    MATCH (a:Actor {nombre: $user_id})-[r:ACTUÓ_EN]->(m:Pelicula)
-    RETURN m.titulo AS title, m.rating AS rating
-    LIMIT 25
+    MATCH (m:Pelicula)
+    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula as img
+    ORDER BY año DESC
+    LIMIT 10
     """
-    result = tx.run(query, user_id=user_id)
-    return [{"title": record["title"], "rating": record["rating"]} for record in result]
+    result = tx.run(query)
+    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"]} for record in result]
 
+def get_movie_mas_vistas(tx):
+    query = """
+    MATCH (m:Pelicula)
+    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula as img
+    ORDER BY rating DESC
+    LIMIT 10
+    """
+    result = tx.run(query)
+    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"]} for record in result]
+    
 # Ruta para obtener recomendaciones de películas
-@app.route('/recommendations')
+@app.route('/nuevoslanzamientos')
 def recommendations():
-    user_id = "Tom Hanks"
     try:
         with driver.session() as session:
-            results = session.read_transaction(get_movie_recommendations, user_id)
+            results = session.read_transaction(get_movie_nuevos_lanzamientos)
         return jsonify(results)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/masvistas')
+def nuevos_lanzamientos():
+    try:
+        with driver.session() as session:
+            results = session.read_transaction(get_movie_mas_vistas)
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+def create_usuario(tx, hnombre_usuario, hedad, hemail, hfecha_registro, hpass):
+    tx.run("MERGE (u:Usuario {nombre: $nombre, edad: $edad, email: $email, fecha_registro: $fecha_registro, passd: $passd})",
+           nombre=hnombre_usuario, edad=hedad, email=hemail, fecha_registro=hfecha_registro, passd=hpass)
+
+
+@app.route('/registro', methods=['POST'])
+def registro():
+    nombre = request.form['nombre']
+    email = request.form['email']
+    password = request.form['password']
+    edad = request.form['edad']
+    
+    try:
+        with driver.session() as session:
+            session.write_transaction(create_usuario, nombre, edad, email,"2024-05-20",password)
+        return jsonify({"message": "Usuario registrado exitosamente"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 if __name__ == '__main__':
     app.run(debug=True)

@@ -8,6 +8,7 @@ npm==10.8.0
 neo4j
 
 correr backend:py backend\app.py
+npm install -g npm
 npm install en carpeta frontend y correr: npm start
 
 
