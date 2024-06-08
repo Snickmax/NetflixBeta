@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
-import Form from './Form';
+import Registro from './Registro';
 import './Style.css';
 
 
@@ -10,7 +10,7 @@ function Main() {
 
   return (
     <div>
-      {showApp ? <Form /> : <App />}
+      {showApp ? <Registro /> : <App />}
       <button onClick={() => setShowApp(!showApp)}>Cambiar a {showApp ? 'App' : 'Form'}</button>
     </div>
   );

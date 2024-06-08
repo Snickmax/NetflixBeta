@@ -38,8 +38,71 @@ def get_movie_mas_vistas(tx):
     """
     result = tx.run(query)
     return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"]} for record in result]
+
+def get_peliculas_vistas(tx, usuario):
+    query = """
+    MATCH (u:Usuario {nombre: $usuario})-[:VIO]->(m:Pelicula)
+    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.caratula as img
+    """
+    result = tx.run(query, usuario=usuario)
+    return [{"title": record["title"], "rating": record["rating"], "img": record["img"]} for record in result]
+
+def get_peliculas_quiere_ver(tx, usuario):
+    query = """
+    MATCH (u:Usuario {nombre: $usuario})-[:QUIERE_VER]->(m:Pelicula)
+    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.caratula as img
+    """
+    result = tx.run(query, usuario=usuario)
+    return [{"title": record["title"], "rating": record["rating"], "img": record["img"]} for record in result]
+
+def verificar_usuario(tx, usuario, password):
+    query = """
+    MATCH (u:Usuario {nombre: $usuario, passd: $password})
+    RETURN u.nombre AS nombre, u.passd AS password
+    """
+    result = tx.run(query, usuario=usuario, password=password)
+    record = result.single()
+    return record
+
+def create_usuario(tx, hnombre_usuario, hedad, hemail, hfecha_registro, hpass):
+    tx.run("MERGE (u:Usuario {nombre: $nombre, edad: $edad, email: $email, fecha_registro: $fecha_registro, passd: $passd})",
+           nombre=hnombre_usuario, edad=hedad, email=hemail, fecha_registro=hfecha_registro, passd=hpass)
+
+@app.route('/registro', methods=['POST'])
+def registro():
+    nombre = request.form['nombre']
+    email = request.form['email']
+    password = request.form['contra']
+    edad = request.form['edad']
     
-# Ruta para obtener recomendaciones de películas
+    try:
+        with driver.session() as session:
+            session.write_transaction(create_usuario, nombre, edad, email, "2024-05-20", password)
+        return jsonify({"message": "Usuario registrado exitosamente"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/Inicio', methods=['POST'])
+def login():
+    usuario = request.form['usuario']
+    password = request.form['password']
+    
+    try:
+        with driver.session() as session:
+            user = session.read_transaction(verificar_usuario, usuario, password)
+            if user:
+                peliculas_vistas = session.read_transaction(get_peliculas_vistas, usuario)
+                peliculas_favoritas = session.read_transaction(get_peliculas_quiere_ver, usuario)
+                return jsonify({
+                    "usuario": {"nombre": user["nombre"], "password": user["password"]},
+                    "peliculasVistas": peliculas_vistas,
+                    "peliculasFavoritas": peliculas_favoritas
+                })
+            else:
+                return jsonify({"error": "Credencdddiales inválidas"}), 401
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/nuevoslanzamientos')
 def recommendations():
     try:
@@ -55,25 +118,6 @@ def nuevos_lanzamientos():
         with driver.session() as session:
             results = session.read_transaction(get_movie_mas_vistas)
         return jsonify(results)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-def create_usuario(tx, hnombre_usuario, hedad, hemail, hfecha_registro, hpass):
-    tx.run("MERGE (u:Usuario {nombre: $nombre, edad: $edad, email: $email, fecha_registro: $fecha_registro, passd: $passd})",
-           nombre=hnombre_usuario, edad=hedad, email=hemail, fecha_registro=hfecha_registro, passd=hpass)
-
-
-@app.route('/registro', methods=['POST'])
-def registro():
-    nombre = request.form['nombre']
-    email = request.form['email']
-    password = request.form['password']
-    edad = request.form['edad']
-    
-    try:
-        with driver.session() as session:
-            session.write_transaction(create_usuario, nombre, edad, email,"2024-05-20",password)
-        return jsonify({"message": "Usuario registrado exitosamente"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
