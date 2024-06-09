@@ -19,14 +19,6 @@ neo4j_password = os.getenv("NEO4J_PASSWORD")
 # Crear una instancia de Driver para interactuar con la base de datos Neo4j
 driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_user, neo4j_password))
 
-def get_users(tx):
-    query = """
-    MATCH (u:Usuario)
-    RETURN u.nombre AS nombre
-    """
-    result = tx.run(query)
-    return [{"nombre": record["nombre"]} for record in result]
-
 #   --- Consultas movies---
 # mandamos los nuevos lanzamientos
 def get_movie_nuevos_lanzamientos(tx, usuario):
@@ -151,73 +143,22 @@ def get_recomendaciones_para_ti(tx, usuario, generos_mas_vistos):
 #   --- Login ---
 def verificar_usuario(tx, usuario, password):
     query = """
-    MATCH (u:Usuario {nombre: $usuario})-[r:CALIFICO]->(m:Pelicula)
-    RETURN m.titulo AS title, r.rating AS rating, m.caratula as img
+    MATCH (u:Usuario {nombre: $usuario, passd: $password})
+    RETURN u.nombre AS nombre, u.passd AS password
     """
-    result = tx.run(query, usuario=usuario)
-    return [{"title": record["title"], "rating": record["rating"], "img": record["img"]} for record in result]
+    result = tx.run(query, usuario=usuario, password=password)
+    record = result.single()
+    return record
 
 def create_usuario(tx, hnombre_usuario, hedad, hemail, hfecha_registro, hpass):
     tx.run("MERGE (u:Usuario {nombre: $nombre, edad: $edad, email: $email, fecha_registro: $fecha_registro, passd: $passd})",
            nombre=hnombre_usuario, edad=hedad, email=hemail, fecha_registro=hfecha_registro, passd=hpass)
 
-def mostrar_todas_peliculas(tx):
-    query = """
-    MATCH (m:Pelicula)
-    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula as img, m.genero as gender
-    ORDER BY title ASC
-    """
-    result = tx.run(query)
-    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"], "genero": record["gender"]} for record in result]
-
-@app.route('/usuarios', methods=['GET'])
-def usuarios():
-    try:
-        with driver.session() as session:
-            users = session.read_transaction(get_users)
-        return jsonify(users)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/peliculasVistas/<usuario>', methods=['GET'])
-def get_peliculas_vistas(usuario):
-    def query(tx, usuario):
-        result = tx.run("MATCH (u:Usuario {nombre: $nombre})-[:VIO]->(p:Pelicula) RETURN p", nombre=usuario)
-        return [record['p'] for record in result]
-    
-    with driver.session() as session:
-        peliculas = session.execute_read(query, usuario)
-        peliculas_list = [{'title': p['titulo'], 'fecha': p['año'], 'rating': p['calificacion_promedio'], 'img': p['caratula']} for p in peliculas]
-    return jsonify(peliculas_list)
-
-
-@app.route('/peliculasQuiereVer/<usuario>', methods=['GET'])
-def get_peliculas_quiere_ver(usuario):
-    def query(tx, usuario):
-        result = tx.run("MATCH (u:Usuario {nombre: $nombre})-[:QUIERE_VER]->(p:Pelicula) RETURN p", nombre=usuario)
-        return [record['p'] for record in result]
-    
-    with driver.session() as session:
-        peliculas = session.execute_read(query, usuario)
-        peliculas_list = [{'title': p['titulo'], 'fecha': p['año'], 'rating': p['calificacion_promedio'], 'img': p['caratula']} for p in peliculas]
-    return jsonify(peliculas_list)
-
-@app.route('/peliculasCalificadas/<usuario>', methods=['GET'])
-def get_peliculas_calificadas(usuario):
-    def query(tx, usuario):
-        result = tx.run("MATCH (u:Usuario {nombre: $nombre})-[:CALIFICO]->(p:Pelicula) RETURN p", nombre=usuario)
-        return [record['p'] for record in result]
-    
-    with driver.session() as session:
-        peliculas = session.execute_read(query, usuario)
-        peliculas_list = [{'title': p['titulo'], 'fecha': p['año'], 'rating': p['calificacion_promedio'], 'img': p['caratula']} for p in peliculas]
-    return jsonify(peliculas_list)
-    
 @app.route('/registro', methods=['POST'])
 def registro():
     nombre = request.form['nombre']
     email = request.form['email']
-    password = request.form['password']
+    password = request.form['contra']
     edad = request.form['edad']
     
     try:
@@ -248,8 +189,20 @@ def login():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/nuevoslanzamientos')
-def recommendations():
+#   --- recomendaciones ---
+
+"""
+nuevos_lanzamientos():
+    Función: Esta ruta devuelve las últimas películas lanzadas que el usuario aún no ha visto.
+    
+    Respuesta: Devuelve una lista de hasta 10 películas ordenadas por año de lanzamiento, con su título, calificación promedio, año y carátula.
+"""
+@app.route('/nuevoslanzamientos', methods=['GET'])
+def nuevos_lanzamientos():
+    usuario = request.args.get('usuario')
+    if not usuario:
+        return jsonify({"error": "Usuario no proporcionado"}), 400
+
     try:
         with driver.session() as session:
             results = session.read_transaction(get_movie_nuevos_lanzamientos, usuario)
@@ -275,5 +228,84 @@ def mas_vistas():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+"""
+recomendar_por_generos():
+    Función: Esta ruta recomienda películas al usuario basadas en los géneros que más ha visto.
+    Respuesta: Devuelve un diccionario donde las claves son los géneros más vistos por el usuario y los valores son listas de hasta 10 películas recomendadas por cada género. Cada película incluye su título, calificación promedio, año y carátula.
+"""
+@app.route('/recomendarporgeneros', methods=['GET'])
+def recomendar_por_generos():
+    usuario = request.args.get('usuario')
+    if not usuario:
+        return jsonify({"error": "Usuario no proporcionado"}), 400
+    
+    try:
+        with driver.session() as session:
+            generos_mas_vistos = session.read_transaction(get_generos_mas_vistos_por_usuario, usuario)
+            if not generos_mas_vistos:
+                return jsonify({"error": "No se encontraron géneros para el usuario proporcionado"}), 404
+            
+            recomendaciones = {}
+            for genero in generos_mas_vistos:
+                peliculas_recomendadas = session.read_transaction(recomendar_peliculas_generos_independientes, usuario, [genero])
+                if peliculas_recomendadas:
+                    recomendaciones[genero] = peliculas_recomendadas
+
+            return jsonify(recomendaciones)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+"""
+recomendar_por_pelicula():
+    Función: Esta ruta recomienda películas al usuario basadas en una película específica que ha visto.
+    Respuesta: Devuelve una lista de hasta 10 películas recomendadas. Incluye las películas del mismo género que la película proporcionada, seguidas de películas de géneros independientes. Cada película incluye su título, calificación promedio, año y carátula.
+"""
+@app.route('/recomendarporpelicula', methods=['GET'])
+def recomendar_por_pelicula():
+    usuario = request.args.get('usuario')
+    titulo = request.args.get('titulo')
+    if not usuario or not titulo:
+        return jsonify({"error": "Usuario o título de película no proporcionado"}), 400
+    
+    try:
+        with driver.session() as session:
+            generos = session.read_transaction(get_generos_de_pelicula_vista, usuario, titulo)
+            if not generos:
+                return jsonify({"error": "No se encontraron géneros para la película proporcionada"}), 404
+
+            mismas_generos_peliculas = session.read_transaction(recomendar_peliculas_mismos_generos, usuario, generos)
+            combinadas_peliculas = mismas_generos_peliculas
+            if len(mismas_generos_peliculas) < 10:
+                generos_independientes_peliculas = session.read_transaction(recomendar_peliculas_generos_independientes, usuario, generos)
+                combinadas_peliculas += generos_independientes_peliculas
+                combinadas_peliculas = combinadas_peliculas[:10]  # Limitar a 10 resultados
+
+            return jsonify(combinadas_peliculas)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+"""
+recomendaciones_para_ti():
+    Función: Esta ruta proporciona recomendaciones personalizadas al usuario basadas en sus géneros de películas más vistos.
+    Respuesta: Devuelve una lista de hasta 10 películas recomendadas para el usuario. Las películas están seleccionadas en función de los géneros más vistos por el usuario. Cada película incluye su título, calificación promedio, año y carátula.
+"""
+@app.route('/recomendacionesparati', methods=['GET'])
+def recomendaciones_para_ti():
+    usuario = request.args.get('usuario')
+    if not usuario:
+        return jsonify({"error": "Usuario no proporcionado"}), 400
+    
+    try:
+        with driver.session() as session:
+            generos_mas_vistos = session.read_transaction(get_generos_mas_vistos_por_usuario2, usuario)
+            if not generos_mas_vistos:
+                return jsonify({"error": "No se encontraron géneros para el usuario proporcionado"}), 404
+            
+            recomendaciones = session.read_transaction(get_recomendaciones_para_ti, usuario, generos_mas_vistos)
+
+            return jsonify(recomendaciones)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
