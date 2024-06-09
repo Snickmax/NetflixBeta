@@ -367,6 +367,46 @@ def obtener_peliculas():
             return jsonify(peliculas)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+def create_visto(tx, nombre_usuario, titulo_pelicula):
+    query = """
+    MATCH (u:Usuario {nombre: $nombre_usuario}), (p:Pelicula {titulo: $titulo_pelicula})
+    MERGE (u)-[:VIO]->(p)
+    """
+    tx.run(query, nombre_usuario=nombre_usuario, titulo_pelicula=titulo_pelicula)
+
+@app.route('/marcar_como_visto/<usuario>/<titulo>', methods=['POST'])
+def marcar_como_visto(usuario, titulo):
+
+    if not usuario or not titulo:
+        return jsonify({"success": False, "message": "Datos insuficientes."}), 400
+
+    try:
+        with driver.session() as session:
+            session.write_transaction(create_visto, usuario, titulo)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+    
+def create_quiere_ver(tx, nombre_usuario, titulo_pelicula):
+    query = """
+    MATCH (u:Usuario {nombre: $nombre_usuario}), (p:Pelicula {titulo: $titulo_pelicula})
+    MERGE (u)-[:QUIERE_VER]->(p)
+    """
+    tx.run(query, nombre_usuario=nombre_usuario, titulo_pelicula=titulo_pelicula)
+
+@app.route('/marcar_quiere_ver/<usuario>/<titulo>', methods=['POST'])
+def marcar_quiere_ver(usuario, titulo):
+
+    if not usuario or not titulo:
+        return jsonify({"success": False, "message": "Datos insuficientes."}), 400
+
+    try:
+        with driver.session() as session:
+            session.write_transaction(create_quiere_ver, usuario, titulo)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

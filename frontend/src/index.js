@@ -109,7 +109,7 @@ function Main() {
         {mostrarRegistro ? (
           <Registro onRegistroSuccess={handleRegistroSuccess} />
         ) : mostrarPeliculas ? (
-          <PeliculasList peliculas={peliculas} />
+          <PeliculasList usuario={selectedUsuario} />
         ) : (
           selectedUsuario ? (
             <App usuario={selectedUsuario} />
