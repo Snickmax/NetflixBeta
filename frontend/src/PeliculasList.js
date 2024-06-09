@@ -1,13 +1,14 @@
+// PeliculasList.js
+
 import React, { useState, useEffect } from 'react';
 
-function MasVistas() {
+function PeliculasList() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-
   useEffect(() => {
-    fetch("/masvistas")
+    fetch("/peliculas")
       .then(res => {
         if (!res.ok) {
           throw new Error('Network response was not ok');
@@ -34,7 +35,7 @@ function MasVistas() {
 
   return (
     <div>
-        <h2>Mas Vistas</h2>
+        <h2>Cartelera Completa</h2>
         <div className="cartelera">
           {data.map((movie, i) => (
             <div key={i} className="movie">
@@ -47,4 +48,4 @@ function MasVistas() {
   );
 }
 
-export default MasVistas;
+export default PeliculasList;

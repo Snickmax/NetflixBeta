@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 function RegistroUsuario() {
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
-  const [contra, setContra] = useState('');
+  const [password, setPassword] = useState('');
   const [edad, setEdad] = useState('');
 
   const handleSubmit = async (e) => {
@@ -13,7 +13,7 @@ function RegistroUsuario() {
       const formData = new FormData();
       formData.append('nombre', nombre);
       formData.append('email', email);
-      formData.append('contra', contra);
+      formData.append('password', password);
       formData.append('edad', edad);
 
       // Realiza la solicitud POST al endpoint /registro
@@ -26,7 +26,7 @@ function RegistroUsuario() {
       // Limpia los campos después del envío
       setNombre('');
       setEmail('');
-      setContra('');
+      setPassword('');
       setEdad('');
     } catch (error) {
       console.error('Error al registrar el usuario:', error);
@@ -68,12 +68,12 @@ function RegistroUsuario() {
           />
         </div>
         <div>
-          <label htmlFor="contra">Contraseña:</label>
+          <label htmlFor="password">Contraseña:</label>
           <input
             type="password"
-            id="contra"
-            value={contra}
-            onChange={(e) => setContra(e.target.value)}
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>
