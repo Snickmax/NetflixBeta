@@ -30,18 +30,31 @@ function Recomendar_Por_Generos({ usuario }) {
   if (error) {
     return;
   }
+  console.log("hoss");
+  for (var clave in data) {
+    console.log("ho");
+    if (data.hasOwnProperty(clave)){
+      console.log("Clave: " + clave + ", Valor: " + data[clave]);
+    }
+    
+  }
+
 
   return (
     <div>
-      <h2>Películas Vistas por {usuario}</h2>
-      <div className="cartelera">
-        {data.map((movie, i) => (
-          <div key={i} className="movie">
-            <h3>{movie.title} {movie.año} ({movie.rating})</h3>
-            <img src={movie.img} alt={movie.title} style={{ width: '200px', height: '300px' }} />
+      {Object.keys(data).map((genero, j) => (
+            <div key={j}>
+            <h3>Porque viste {genero}</h3>
+            <div className="cartelera">
+              {data[genero].map((movie, i) => (
+              <div key={i} className="movie">
+                <h4>{movie.title} ({movie.año}) - Rating: {movie.rating}</h4>
+                <img src={movie.img} alt={movie.title} style={{ width: '200px', height: '300px' }} />
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }
