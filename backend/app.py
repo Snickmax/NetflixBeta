@@ -332,7 +332,7 @@ def recomendaciones_para_ti(usuario):
         with driver.session() as session:
             generos_mas_vistos = session.read_transaction(get_generos_mas_vistos_por_usuario2, usuario)
             if not generos_mas_vistos:
-                return jsonify({"error": "No se encontraron géneros para el usuario proporcionado"}), 404
+                return jsonify({"error": f"No se encontraron géneros para el usuario {usuario}"}), 404
             
             recomendaciones = session.read_transaction(get_recomendaciones_para_ti, usuario, generos_mas_vistos)
 
