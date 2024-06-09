@@ -237,6 +237,19 @@ def peliculas_vistas(usuario):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+# peliculas quiere ver
+@app.route('/quierever/<usuario>', methods=['GET'])
+def peliculas_quiere_ver(usuario):
+    if not usuario:
+        return jsonify({"error": "Usuario no proporcionado"}), 400
+
+    try:
+        with driver.session() as session:
+            results = session.read_transaction(get_peliculas_quiere_ver, usuario)
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 """
 mas_vistas():
     Función: Esta ruta devuelve las películas más vistas que el usuario aún no ha visto.
