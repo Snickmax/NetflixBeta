@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
-function NuevosLanzamientos() {
+function NuevosLanzamientos({usuario}) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
 
   useEffect(() => {
-    fetch("/nuevoslanzamientos")
+    fetch(`/nuevoslanzamientos/${usuario}`)
       .then(res => {
         if (!res.ok) {
           throw new Error('Network response was not ok');

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
-function MasVistas() {
+function MasVistas({usuario}) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
 
   useEffect(() => {
-    fetch("/masvistas")
+    fetch(`/masvistas/${usuario}`)
       .then(res => {
         if (!res.ok) {
           throw new Error('Network response was not ok');
