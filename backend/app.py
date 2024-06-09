@@ -217,8 +217,6 @@ nuevos_lanzamientos():
 @app.route('/nuevoslanzamientos', methods=['GET'])
 def nuevos_lanzamientos():
     usuario = request.args.get('usuario')
-    if not usuario:
-        return jsonify({"error": "Usuario no proporcionado"}), 400
 
     try:
         with driver.session() as session:
@@ -235,8 +233,6 @@ mas_vistas():
 @app.route('/masvistas', methods=['GET'])
 def mas_vistas():
     usuario = request.args.get('usuario')
-    if not usuario:
-        return jsonify({"error": "Usuario no proporcionado"}), 400
     
     try:
         with driver.session() as session:
