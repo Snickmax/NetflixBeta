@@ -28,7 +28,7 @@ function PeliculasVistas({ usuario }) {
   }
 
   if (error) {
-    return <p>Error: {error.message}</p>;
+    return;
   }
 
   return (
