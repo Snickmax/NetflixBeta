@@ -9,8 +9,8 @@ function Main() {
   const [usuarios, setUsuarios] = useState([]);
   const [selectedUsuario, setSelectedUsuario] = useState(null);
   const [mostrarRegistro, setMostrarRegistro] = useState(false);
-  const [mostrarPeliculas, setMostrarPeliculas] = useState(false); // Estado para mostrar las películas
-
+  const [mostrarPeliculas, setMostrarPeliculas] = useState(false);
+  const [peliculas, setPeliculas] = useState({});
 
   useEffect(() => {
     const fetchUsuarios = async () => {
@@ -19,16 +19,49 @@ function Main() {
       setUsuarios(data);
     };
     fetchUsuarios();
+
+    const fetchPeliculas = async () => {
+      const response = await fetch('/peliculas');
+      const data = await response.json();
+      setPeliculas(data);
+    };
+    fetchPeliculas();
   }, []);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const usuarioNombre = urlParams.get('usuario');
+    if (usuarioNombre) {
+      const usuario = usuarios.find(u => u.nombre === usuarioNombre);
+      if (usuario) {
+        setSelectedUsuario(usuario);
+      }
+    } else {
+      const storedUsuario = localStorage.getItem('selectedUsuario');
+      if (storedUsuario) {
+        const usuario = usuarios.find(u => u.nombre === storedUsuario);
+        if (usuario) {
+          setSelectedUsuario(usuario);
+        }
+      }
+    }
+  }, [usuarios]);
 
   const handleUsuarioChange = (e) => {
     const usuarioNombre = e.target.value;
     const usuario = usuarios.find(u => u.nombre === usuarioNombre);
-    setSelectedUsuario(usuario);
+    if (usuario) {
+      localStorage.setItem('selectedUsuario', usuario.nombre);
+      setSelectedUsuario(usuario);
+      const newUrl = `${window.location.pathname}?usuario=${usuario.nombre}`;
+      window.history.pushState({}, '', newUrl);
+      window.location.reload();
+    }
   };
 
   const handleRegistroClick = () => {
     setMostrarRegistro(true);
+    setMostrarPeliculas(false);
   };
 
   const handleMostrarPeliculasClick = () => {
@@ -39,6 +72,10 @@ function Main() {
   const handleVolverInicioClick = () => {
     setMostrarPeliculas(false);
     setMostrarRegistro(false);
+    setSelectedUsuario(null);
+    localStorage.removeItem('selectedUsuario');
+    const newUrl = window.location.pathname;
+    window.history.pushState({}, '', newUrl);
   };
 
   const handleRegistroSuccess = () => {
@@ -57,7 +94,7 @@ function Main() {
         <div>
           <button onClick={handleRegistroClick} style={{ marginRight: '20px' }}>Registrarse</button>
           <button onClick={handleVolverInicioClick} style={{ marginRight: '20px' }}>Volver al Inicio</button>
-          <button onClick={handleMostrarPeliculasClick} style={{ marginRight: '20px' }}>Mostrar películas</button> {/* Botón para mostrar las películas */}
+          <button onClick={handleMostrarPeliculasClick} style={{ marginRight: '20px' }}>Mostrar películas</button>
           <select id="selectUsuario" onChange={handleUsuarioChange} value={selectedUsuario ? selectedUsuario.nombre : ""}>
             <option value="" disabled>Selecciona un usuario</option>
             {usuarios.map((usuario, index) => (
@@ -72,7 +109,7 @@ function Main() {
         {mostrarRegistro ? (
           <Registro onRegistroSuccess={handleRegistroSuccess} />
         ) : mostrarPeliculas ? (
-          <PeliculasList /> // Mostramos PeliculasList cuando se hace clic en "Mostrar películas"
+          <PeliculasList peliculas={peliculas} />
         ) : (
           selectedUsuario ? (
             <App usuario={selectedUsuario} />
