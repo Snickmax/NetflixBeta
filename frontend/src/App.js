@@ -14,11 +14,12 @@ function App({ usuario }) {
       <main>
         <p>Aquí encontrarás recomendaciones personalizadas de películas.</p>
 
+        <MasVistas />
+        <NuevosLanzamientos />
         <Peliculas_Vistas usuario={usuario.nombre} />
         <Peliculas_Quiere_Ver usuario={usuario.nombre} />
         <Peliculas_Calificadas usuario={usuario.nombre} />
-        <MasVistas />
-        <NuevosLanzamientos />
+        
         
       </main>
       <footer>

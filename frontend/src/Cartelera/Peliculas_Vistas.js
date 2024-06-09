@@ -6,7 +6,7 @@ function PeliculasVistas({ usuario }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch(`/peliculasVistas/${usuario}`)
+    fetch(`/recomendarporgeneros/${usuario}`)
       .then(res => {
         if (!res.ok) {
           throw new Error('Network response was not ok');
