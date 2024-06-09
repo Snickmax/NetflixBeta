@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
-function Peliculas_Para_Ti({ usuario }) {
+function Recomendar_Por_Generos({ usuario }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch(`/recomendacionesparati/${usuario}`)
+    fetch(`/recomendarporgeneros/${usuario}`)
       .then(res => {
         if (!res.ok) {
           throw new Error('Network response was not ok');
@@ -33,7 +33,7 @@ function Peliculas_Para_Ti({ usuario }) {
 
   return (
     <div>
-      <h2>Recomendaciones para {usuario}</h2>
+      <h2>Películas Vistas por {usuario}</h2>
       <div className="cartelera">
         {data.map((movie, i) => (
           <div key={i} className="movie">
@@ -46,4 +46,4 @@ function Peliculas_Para_Ti({ usuario }) {
   );
 }
 
-export default Peliculas_Para_Ti;
+export default Recomendar_Por_Generos;
