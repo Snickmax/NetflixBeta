@@ -30,15 +30,6 @@ function Recomendar_Por_Generos({ usuario }) {
   if (error) {
     return;
   }
-  console.log("hoss");
-  for (var clave in data) {
-    console.log("ho");
-    if (data.hasOwnProperty(clave)){
-      console.log("Clave: " + clave + ", Valor: " + data[clave]);
-    }
-    
-  }
-
 
   return (
     <div>

@@ -5,6 +5,7 @@ import Peliculas_Vistas from './Cartelera/Peliculas_Vistas';
 import Peliculas_Quiere_Ver from './Cartelera/Peliculas_Quiere_Ver';
 import Peliculas_Para_Ti from './Cartelera/Peliculas_Para_Ti';
 import Recomendar_Por_Generos from './Cartelera/Recomendar_Por_Generos';
+import Rec_Peli from './Cartelera/Rec_Peli';
 
 function App({ usuario }) {
   return (
@@ -21,6 +22,7 @@ function App({ usuario }) {
         <Peliculas_Quiere_Ver usuario={usuario.nombre} />
         <Peliculas_Para_Ti usuario={usuario.nombre} />
         <Recomendar_Por_Generos usuario={usuario.nombre} />
+        <Rec_Peli usuario={usuario.nombre} />
         
         
       </main>

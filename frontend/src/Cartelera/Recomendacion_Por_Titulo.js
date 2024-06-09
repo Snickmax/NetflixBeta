@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import Recomendacion_Por_Titulo from './Recomendacion_Por_Titulo';
 
-function Rec_Peli({ usuario }) {
+function Recomendacion_Por_Titulo({ usuario , titulo }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch(`/peliculasvistas/${usuario}`)
+    fetch(`/recomendarporpelicula/${usuario}/${titulo}`)
       .then(res => {
         if (!res.ok) {
           throw new Error('Network response was not ok');
@@ -34,11 +33,17 @@ function Rec_Peli({ usuario }) {
 
   return (
     <div>
+      <h2>Recomendacion porque viste {titulo}</h2>
+      <div className="cartelera">
         {data.map((movie, i) => (
-        <Recomendacion_Por_Titulo usuario={usuario} titulo={movie.title} />
+          <div key={i} className="movie">
+            <h3>{movie.title} {movie.año} ({movie.rating})</h3>
+            <img src={movie.img} alt={movie.title} style={{ width: '200px', height: '300px' }} />
+          </div>
         ))}
+      </div>
     </div>
   );
 }
 
-export default Rec_Peli;
+export default Recomendacion_Por_Titulo;
