@@ -214,9 +214,8 @@ nuevos_lanzamientos():
     
     Respuesta: Devuelve una lista de hasta 10 películas ordenadas por año de lanzamiento, con su título, calificación promedio, año y carátula.
 """
-@app.route('/nuevoslanzamientos', methods=['GET'])
-def nuevos_lanzamientos():
-    usuario = request.args.get('usuario')
+@app.route('/nuevoslanzamientos/<usuario>', methods=['GET'])
+def nuevos_lanzamientos(usuario):
 
     try:
         with driver.session() as session:
@@ -226,9 +225,8 @@ def nuevos_lanzamientos():
         return jsonify({"error": str(e)}), 500
 
 # peliculas vistas
-@app.route('/peliculasvistas', methods=['GET'])
-def peliculas_vistas():
-    usuario = request.args.get('usuario')
+@app.route('/peliculasvistas/<usuario>', methods=['GET'])
+def peliculas_vistas(usuario):
     if not usuario:
         return jsonify({"error": "Usuario no proporcionado"}), 400
 
@@ -244,9 +242,8 @@ mas_vistas():
     Función: Esta ruta devuelve las películas más vistas que el usuario aún no ha visto.
     Respuesta: Devuelve una lista de hasta 10 películas ordenadas por calificación promedio, con su título, calificación promedio, año y carátula.
 """
-@app.route('/masvistas', methods=['GET'])
-def mas_vistas():
-    usuario = request.args.get('usuario')
+@app.route('/masvistas/<usuario>', methods=['GET'])
+def mas_vistas(usuario):
     
     try:
         with driver.session() as session:
@@ -260,9 +257,8 @@ recomendar_por_generos():
     Función: Esta ruta recomienda películas al usuario basadas en los géneros que más ha visto.
     Respuesta: Devuelve un diccionario donde las claves son los géneros más vistos por el usuario y los valores son listas de hasta 10 películas recomendadas por cada género. Cada película incluye su título, calificación promedio, año y carátula.
 """
-@app.route('/recomendarporgeneros', methods=['GET'])
-def recomendar_por_generos():
-    usuario = request.args.get('usuario')
+@app.route('/recomendarporgeneros/<usuario>', methods=['GET'])
+def recomendar_por_generos(usuario):
     if not usuario:
         return jsonify({"error": "Usuario no proporcionado"}), 400
     
@@ -287,10 +283,8 @@ recomendar_por_pelicula():
     Función: Esta ruta recomienda películas al usuario basadas en una película específica que ha visto.
     Respuesta: Devuelve una lista de hasta 10 películas recomendadas. Incluye las películas del mismo género que la película proporcionada, seguidas de películas de géneros independientes. Cada película incluye su título, calificación promedio, año y carátula.
 """
-@app.route('/recomendarporpelicula', methods=['GET'])
-def recomendar_por_pelicula():
-    usuario = request.args.get('usuario')
-    titulo = request.args.get('titulo')
+@app.route('/recomendarporpelicula/<usuario>/<titulo>', methods=['GET'])
+def recomendar_por_pelicula(usuario, titulo):
     if not usuario or not titulo:
         return jsonify({"error": "Usuario o título de película no proporcionado"}), 400
     
@@ -316,9 +310,8 @@ recomendaciones_para_ti():
     Función: Esta ruta proporciona recomendaciones personalizadas al usuario basadas en sus géneros de películas más vistos.
     Respuesta: Devuelve una lista de hasta 10 películas recomendadas para el usuario. Las películas están seleccionadas en función de los géneros más vistos por el usuario. Cada película incluye su título, calificación promedio, año y carátula.
 """
-@app.route('/recomendacionesparati', methods=['GET'])
-def recomendaciones_para_ti():
-    usuario = request.args.get('usuario')
+@app.route('/recomendacionesparati/<usuario>', methods=['GET'])
+def recomendaciones_para_ti(usuario):
     if not usuario:
         return jsonify({"error": "Usuario no proporcionado"}), 400
     
