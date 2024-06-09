@@ -3,7 +3,7 @@ import MasVistas from './Cartelera/MasVistas';
 import NuevosLanzamientos from './Cartelera/NuevosLanzamientos';
 import Peliculas_Vistas from './Cartelera/Peliculas_Vistas';
 import Peliculas_Quiere_Ver from './Cartelera/Peliculas_Quiere_Ver';
-import Peliculas_Calificadas from './Cartelera/Peliculas_Calificadas';
+import Peliculas_Para_Ti from './Cartelera/Peliculas_Para_Ti';
 
 function App({ usuario }) {
   return (
@@ -18,7 +18,7 @@ function App({ usuario }) {
         <NuevosLanzamientos />
         <Peliculas_Vistas usuario={usuario.nombre} />
         <Peliculas_Quiere_Ver usuario={usuario.nombre} />
-        <Peliculas_Calificadas usuario={usuario.nombre} />
+        <Peliculas_Para_Ti usuario={usuario.nombre} />
         
         
       </main>

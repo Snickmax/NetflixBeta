@@ -37,7 +37,7 @@ function PeliculasVistas({ usuario }) {
       <div className="cartelera">
         {data.map((movie, i) => (
           <div key={i} className="movie">
-            <h3>{movie.title} ({movie.fecha})</h3>
+            <h3>{movie.title} {movie.año} ({movie.rating})</h3>
             <img src={movie.img} alt={movie.title} style={{ width: '200px', height: '300px' }} />
           </div>
         ))}
