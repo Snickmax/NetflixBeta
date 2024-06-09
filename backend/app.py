@@ -52,20 +52,20 @@ def get_movie_mas_vistas(tx, usuario):
 def get_peliculas_quiere_ver(tx, usuario):
     query = """
     MATCH (u:Usuario {nombre: $usuario})-[:QUIERE_VER]->(m:Pelicula)
-    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.caratula as img
+    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula as img
     """
     result = tx.run(query, usuario=usuario)
-    return [{"title": record["title"], "rating": record["rating"], "img": record["img"]} for record in result]
+    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"]} for record in result]
 
 #   --- Recomendacion de peliculas segun una que vio tanto recomendacion por la pelicula y generos ---
 # peliculas que ya vio
 def get_peliculas_vistas(tx, usuario):
     query = """
     MATCH (u:Usuario {nombre: $usuario})-[:VIO]->(m:Pelicula)
-    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.caratula as img
+    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula as img
     """
     result = tx.run(query, usuario=usuario)
-    return [{"title": record["title"], "rating": record["rating"], "img": record["img"]} for record in result]
+    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"]} for record in result]
 
 # genero de las pelicula vista
 def get_generos_de_pelicula_vista(tx, usuario, titulo):
@@ -140,6 +140,23 @@ def get_recomendaciones_para_ti(tx, usuario, generos_mas_vistos):
     result = tx.run(query, usuario=usuario, generos_mas_vistos=generos_mas_vistos)
     return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"], "peso": record["peso"]} for record in result]
 
+# Consulta para obtener todos los usuarios
+def get_all_users(tx):
+    query = """
+    MATCH (u:Usuario)
+    RETURN u.nombre AS nombre
+    """
+    result = tx.run(query)
+    return [{"nombre": record["nombre"]} for record in result]
+
+# Consulta para obtener todos los usuarios
+def get_all_movies(tx):
+    query = """
+    MATCH (m:Pelicula)
+    RETURN m.titulo AS title, m.año AS año, m.calificacion_promedio AS rating, m.caratula as img
+    """
+    result = tx.run(query)
+    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"]} for record in result]
 #   --- Login ---
 def verificar_usuario(tx, usuario, password):
     query = """
@@ -304,6 +321,26 @@ def recomendaciones_para_ti():
             recomendaciones = session.read_transaction(get_recomendaciones_para_ti, usuario, generos_mas_vistos)
 
             return jsonify(recomendaciones)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+# Ruta para obtener todos los usuarios
+@app.route('/usuarios', methods=['GET'])
+def obtener_usuarios():
+    try:
+        with driver.session() as session:
+            usuarios = session.read_transaction(get_all_users)
+            return jsonify(usuarios)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+# Ruta para obtener todas las películas
+@app.route('/peliculas', methods=['GET'])
+def obtener_peliculas():
+    try:
+        with driver.session() as session:
+            peliculas = session.read_transaction(get_all_movies)
+            return jsonify(peliculas)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
