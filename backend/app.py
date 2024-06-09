@@ -233,6 +233,10 @@ def peliculas_vistas(usuario):
     try:
         with driver.session() as session:
             results = session.read_transaction(get_peliculas_vistas, usuario)
+        
+        if not results:
+                return jsonify({"error": "No se encontraron peliculas para el usuario proporcionado"}), 404
+        
         return jsonify(results)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -246,6 +250,10 @@ def peliculas_quiere_ver(usuario):
     try:
         with driver.session() as session:
             results = session.read_transaction(get_peliculas_quiere_ver, usuario)
+        
+        if not results:
+                return jsonify({"error": "No se encontraron peliculas para el usuario proporcionado"}), 404
+        
         return jsonify(results)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
