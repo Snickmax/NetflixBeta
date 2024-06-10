@@ -93,17 +93,17 @@ def recomendar_peliculas_mismos_generos(tx, usuario, generos):
     return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"]} for record in result]
 
 # Peliculas de generos independientes
-def recomendar_peliculas_generos_independientes(tx, usuario, generos):
+def recomendar_peliculas_generos_independientes(tx, usuario, generos, pelis):
     query = """
     MATCH (m:Pelicula)-[:ES_DE]->(g:Genero)
     WHERE g.nombre IN $generos AND NOT EXISTS {
         MATCH (:Usuario {nombre: $usuario})-[:VIO]->(m)
-    }
+    } AND NOT (m.titulo IN $pelis)
     RETURN DISTINCT m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula as img
     ORDER BY rating DESC
     LIMIT 10
     """
-    result = tx.run(query, usuario=usuario, generos=generos)
+    result = tx.run(query, usuario=usuario, generos=generos, pelis=pelis)
     return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"]} for record in result]
 
 # Peliculas de generos independientes
@@ -316,9 +316,11 @@ def recomendar_por_pelicula(usuario, titulo):
                 return jsonify({"error": "No se encontraron géneros para la película proporcionada"}), 404
 
             mismas_generos_peliculas = session.read_transaction(recomendar_peliculas_mismos_generos, usuario, generos)
+            pelis = [ peli['title'] for peli in mismas_generos_peliculas]
+
             combinadas_peliculas = mismas_generos_peliculas
             if len(mismas_generos_peliculas) < 10:
-                generos_independientes_peliculas = session.read_transaction(recomendar_peliculas_generos_independientes, usuario, generos)
+                generos_independientes_peliculas = session.read_transaction(recomendar_peliculas_generos_independientes, usuario, generos, pelis)
                 combinadas_peliculas += generos_independientes_peliculas
                 combinadas_peliculas = combinadas_peliculas[:10]  # Limitar a 10 resultados
 
