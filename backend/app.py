@@ -175,7 +175,7 @@ def create_usuario(tx, hnombre_usuario, hedad, hemail, hfecha_registro, hpass):
 def registro():
     nombre = request.form['nombre']
     email = request.form['email']
-    password = request.form['contra']
+    password = request.form['password']
     edad = request.form['edad']
     
     try:
