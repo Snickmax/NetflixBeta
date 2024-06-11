@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import RegistroUsuario from "./RegistroUsuario";
 import InicioSesion from "./InicioSesion";
 import Home from "./Home";
+import PeliculasList from "./PeliculasList";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token"));

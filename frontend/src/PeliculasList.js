@@ -8,22 +8,28 @@ function PeliculasList({ usuario }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("/peliculas")
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        setData(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        setError(error);
-        setLoading(false);
-      });
-  }, []);
+    if (usuario) {
+      fetch("/peliculas")
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return res.json();
+        })
+        .then((data) => {
+          setData(data);
+          setLoading(false);
+        })
+        .catch((error) => {
+          setError(error);
+          setLoading(false);
+        });
+    } else {
+      // Si el usuario es null, establece los datos como vacíos y detiene la carga
+      setData([]);
+      setLoading(false);
+    }
+  }, [usuario]);
 
   if (loading) {
     return <p>Loading...</p>;
@@ -38,7 +44,7 @@ function PeliculasList({ usuario }) {
       return;
     }
 
-    fetch(`/marcar_como_visto/${usuario.nombre}/${titulo}`, {
+    fetch(`/marcar_como_visto/${usuario}/${titulo}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -63,7 +69,7 @@ function PeliculasList({ usuario }) {
       return;
     }
 
-    fetch(`/marcar_quiere_ver/${usuario.nombre}/${titulo}`, {
+    fetch(`/marcar_quiere_ver/${usuario}/${titulo}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -82,11 +88,41 @@ function PeliculasList({ usuario }) {
       });
   };
 
+  const handleDesmarcarQuiereVer = (titulo) => {
+    if (!usuario) {
+      alert("Por favor, selecciona un usuario primero.");
+      return;
+    }
+
+    fetch(`/desmarcar_quiere_ver/${usuario}/${titulo}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((response) => {
+        if (response.success) {
+          alert(`La película "${titulo}" ha sido quitada de tu lista.`);
+        } else {
+          alert(`No se pudo quitar la película "${titulo}" de tu lista.`);
+        }
+      })
+      .catch((error) => {
+        alert(`Error: ${error.message}`);
+      });
+  };
+
+  const moviesToShow = [...data];
+  while (moviesToShow.length < 5) {
+    moviesToShow.push({ empty: true });
+  }
+
   return (
     <div>
       <h2>Cartelera Completa</h2>
       <div className="cartelera">
-        {data.map((movie, i) => (
+      {moviesToShow.map((movie, i) => (
           <div key={i} className="movie">
             {movie.empty ? (
               <div className="empty-movie"></div>
@@ -99,17 +135,26 @@ function PeliculasList({ usuario }) {
                   </h3>
                 </div>
                 <div className="buttons">
+                  {movie.quiere_ver ? (
+                    <button
+                      className="button"
+                      onClick={() => handleDesmarcarQuiereVer(movie.title)}
+                    >
+                      Quitar de Quiere ver
+                    </button>
+                  ) : (
+                    <button
+                      className="button"
+                      onClick={() => handleMarcarQuiereVer(movie.title)}
+                    >
+                      Quiero Ver
+                    </button>
+                  )}
                   <button
                     className="button"
                     onClick={() => handleMarcarComoVisto(movie.title)}
                   >
                     Ver
-                  </button>
-                  <button
-                    className="button"
-                    onClick={() => handleMarcarQuiereVer(movie.title)}
-                  >
-                    Quiero Ver
                   </button>
                 </div>
               </>
