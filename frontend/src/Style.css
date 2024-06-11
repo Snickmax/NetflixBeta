@@ -1,3 +1,7 @@
+/* Importa los estilos de slick-carousel */
+@import "~slick-carousel/slick/slick.css";
+@import "~slick-carousel/slick/slick-theme.css";
+
 .cartelera {
   display: flex;
   flex-wrap: wrap; /* Permite que los elementos se envuelvan en la siguiente línea si es necesario */
@@ -5,16 +9,95 @@
   justify-content: center; /* Centra los elementos horizontalmente */
 }
 
-.movie {
-  flex: 1 1 200px; /* Permite que los elementos se estiren, pero con un tamaño mínimo de 200px */
-  text-align: center; /* Centra el texto dentro de cada tarjeta de película */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Agrega una sombra para un mejor efecto visual */
-  border-radius: 8px; /* Bordes redondeados */
-  padding: 10px; /* Espacio interno */
-  background-color: #fff; /* Fondo blanco */
+
+.rating {
+  font-size: 24px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none; /* Ocultar los botones por defecto */
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
-header {
-    display: flex;
-    text-align: center;
+.movie:hover .rating {
+  display: flex; /* Mostrar los botones cuando se hace hover */
+}
+
+.movie {
+  position: relative;
+  transition: transform 0.3s ease;
+  width: 200px; /* Ancho fijo del contenedor */
+  overflow: hidden; /* Esconde el contenido que se salga del contenedor */
+}
+
+.movie img {
+  width: 100%;
+  height: auto; /* Mantiene la proporción de la imagen */
+  max-height: 400px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transition: box-shadow 0.3s ease;
+}
+
+.rating .fa-star {
+  font-size: 32px;
+  color: yellow; /* Cambia el color de las estrellas */
+  text-shadow: 0 0 2px black;
+}
+
+.rating .fa-star:hover ~ .fa-star {
+  color: orange; /* Cambia el color de las estrellas a naranja en el hover */
+}
+
+
+.movie:hover img {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
+.movie-title {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  color: white;
+  background: rgba(0, 0, 0, 0.7);
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  box-sizing: border-box;
+}
+
+.movie:hover .movie-title {
+  opacity: 1;
+}
+
+.buttons {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.movie:hover .buttons {
+  opacity: 1;
+}
+
+.button {
+  padding: 5px 10px;
+  color: white;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 12px; /* Tamaño de fuente ajustado para caber mejor */
+  white-space: nowrap; /* Evitar que el texto se divida en varias líneas */
+}
+
+.button:hover {
+  background: rgba(0, 0, 0, 0.9);
 }
