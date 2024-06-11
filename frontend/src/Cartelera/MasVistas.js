@@ -130,6 +130,11 @@ function MasVistas({ usuario }) {
       });
   };
 
+  const handleCalificarPelicula = (titulo, calificacion) => {
+    // Lógica para calificar la película 
+    console.log(`Calificaste "${titulo}" con ${calificacion} estrellas`);
+  };
+
   const moviesToShow = [...data];
   while (moviesToShow.length < 5) {
     moviesToShow.push({ empty: true });
@@ -150,6 +155,21 @@ function MasVistas({ usuario }) {
                   <h3>
                     {movie.title} {movie.año} ({movie.rating})
                   </h3>
+                </div>
+                <div className="rating">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span
+                      key={star}
+                      className={
+                        star <= movie.calificacion
+                          ? "star selected "
+                          : "star fa-star"
+                      }
+                      onClick={() => handleCalificarPelicula(movie.title, star)}
+                    >
+                      &#9733;
+                    </span>
+                  ))}
                 </div>
                 <div className="buttons">
                   {movie.quiere_ver ? (

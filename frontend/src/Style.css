@@ -9,6 +9,21 @@
   justify-content: center; /* Centra los elementos horizontalmente */
 }
 
+
+.rating {
+  font-size: 24px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none; /* Ocultar los botones por defecto */
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.movie:hover .rating {
+  display: flex; /* Mostrar los botones cuando se hace hover */
+}
+
 .movie {
   position: relative;
   transition: transform 0.3s ease;
@@ -23,6 +38,17 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   transition: box-shadow 0.3s ease;
 }
+
+.rating .fa-star {
+  font-size: 32px;
+  color: yellow; /* Cambia el color de las estrellas */
+  text-shadow: 0 0 2px black;
+}
+
+.rating .fa-star:hover ~ .fa-star {
+  color: orange; /* Cambia el color de las estrellas a naranja en el hover */
+}
+
 
 .movie:hover img {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
