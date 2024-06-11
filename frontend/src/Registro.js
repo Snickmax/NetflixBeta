@@ -22,7 +22,7 @@ function RegistroUsuario() {
         body: formData
       });
 
-      console.log('Usuario registrado exitosamente');
+      alert(`EL Usuario "${nombre}" ha sido registrado exitosamente`);
       // Limpia los campos después del envío
       setNombre('');
       setEmail('');
