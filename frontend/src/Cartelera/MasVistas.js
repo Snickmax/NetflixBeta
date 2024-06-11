@@ -84,6 +84,31 @@ function MasVistas({ usuario }) {
       });
   };
 
+  const handleDesmarcarQuiereVer = (titulo) => {
+    if (!usuario) {
+      alert("Por favor, selecciona un usuario primero.");
+      return;
+    }
+
+    fetch(`/desmarcar_quiere_ver/${usuario}/${titulo}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(res => res.json())
+      .then(response => {
+        if (response.success) {
+          alert(`La película "${titulo}" ha sido agregada a tu lista.`);
+        } else {
+          alert(`No se pudo agregar la película "${titulo}" a tu lista.`);
+        }
+      })
+      .catch(error => {
+        alert(`Error: ${error.message}`);
+      });
+  };
+
   const moviesToShow = [...data];
   while (moviesToShow.length < 5) {
     moviesToShow.push({ empty: true });
@@ -106,7 +131,21 @@ function MasVistas({ usuario }) {
                   </h3>
                 </div>
                 <div className="buttons">
-                  <button className="button" onClick={() => handleMarcarQuiereVer(movie.title)}>Quiero Ver</button>
+                  {movie.quiere_ver ? (
+                      <button
+                        className="button"
+                        onClick={() => handleDesmarcarQuiereVer(movie.title)}
+                      >
+                        Quitar de Quiere ver
+                      </button>
+                    ) : (
+                      <button
+                        className="button"
+                        onClick={() => handleMarcarQuiereVer(movie.title)}
+                      >
+                        Quiero Ver
+                      </button>
+                    )}
                   <button className="button" onClick={() => handleMarcarComoVisto(movie.title)}>Ver</button>
                 </div>
               </>

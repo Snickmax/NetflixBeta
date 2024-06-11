@@ -3,6 +3,8 @@ from flask_cors import CORS
 from neo4j import GraphDatabase
 import os
 from dotenv import load_dotenv
+import jwt
+import datetime
 
 # Cargar variables de entorno desde el archivo .env
 load_dotenv()
@@ -16,6 +18,9 @@ neo4j_uri = os.getenv("NEO4J_URI")
 neo4j_user = os.getenv("NEO4J_USER")
 neo4j_password = os.getenv("NEO4J_PASSWORD")
 
+# Configuración JWT
+SECRET_KEY = os.getenv("SECRET_KEY", "papupro")
+
 # Crear una instancia de Driver para interactuar con la base de datos Neo4j
 driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_user, neo4j_password))
 
@@ -27,12 +32,13 @@ def get_movie_nuevos_lanzamientos(tx, usuario):
     WHERE NOT EXISTS {
         MATCH (:Usuario {nombre: $usuario})-[:VIO]->(m)
     }
-    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula as img
+    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula as img,
+           EXISTS((:Usuario {nombre: $usuario})-[:QUIERE_VER]->(m)) AS quiere_ver
     ORDER BY año DESC
     LIMIT 10
     """
     result = tx.run(query, usuario=usuario)
-    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"]} for record in result]
+    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"], "quiere_ver": record["quiere_ver"]} for record in result]
 
 # mandamos las mas vistas
 def get_movie_mas_vistas(tx, usuario):
@@ -41,31 +47,34 @@ def get_movie_mas_vistas(tx, usuario):
     WHERE NOT EXISTS {
         MATCH (:Usuario {nombre: $usuario})-[:VIO]->(m)
     }
-    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula as img
+    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula as img,
+           EXISTS((:Usuario {nombre: $usuario})-[:QUIERE_VER]->(m)) AS quiere_ver
     ORDER BY rating DESC
     LIMIT 10
     """
     result = tx.run(query, usuario=usuario)
-    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"]} for record in result]
+    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"], "quiere_ver": record["quiere_ver"]} for record in result]
 
 # mandamos las peliculas que quiere ver
 def get_peliculas_quiere_ver(tx, usuario):
     query = """
     MATCH (u:Usuario {nombre: $usuario})-[:QUIERE_VER]->(m:Pelicula)
-    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula as img
+    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula as img,
+           EXISTS((:Usuario {nombre: $usuario})-[:QUIERE_VER]->(m)) AS quiere_ver
     """
     result = tx.run(query, usuario=usuario)
-    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"]} for record in result]
+    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"], "quiere_ver": record["quiere_ver"]} for record in result]
 
 #   --- Recomendacion de peliculas segun una que vio tanto recomendacion por la pelicula y generos ---
 # peliculas que ya vio
 def get_peliculas_vistas(tx, usuario):
     query = """
     MATCH (u:Usuario {nombre: $usuario})-[:VIO]->(m:Pelicula)
-    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula as img
+    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula as img,
+           EXISTS((:Usuario {nombre: $usuario})-[:QUIERE_VER]->(m)) AS quiere_ver
     """
     result = tx.run(query, usuario=usuario)
-    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"]} for record in result]
+    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"], "quiere_ver": record["quiere_ver"]} for record in result]
 
 # genero de las pelicula vista
 def get_generos_de_pelicula_vista(tx, usuario, titulo):
@@ -85,12 +94,13 @@ def recomendar_peliculas_mismos_generos(tx, usuario, generos):
     }
     WITH m, COLLECT(g.nombre) AS movieGenres
     WHERE ALL(genre IN $generos WHERE genre IN movieGenres) AND SIZE(movieGenres) = SIZE($generos)
-    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula as img
+    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula as img,
+           EXISTS((:Usuario {nombre: $usuario})-[:QUIERE_VER]->(m)) AS quiere_ver
     ORDER BY rating DESC
     LIMIT 10
     """
     result = tx.run(query, usuario=usuario, generos=generos)
-    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"]} for record in result]
+    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"], "quiere_ver": record["quiere_ver"]} for record in result]
 
 # Peliculas de generos independientes
 def recomendar_peliculas_generos_independientes(tx, usuario, generos, pelis):
@@ -99,13 +109,13 @@ def recomendar_peliculas_generos_independientes(tx, usuario, generos, pelis):
     WHERE g.nombre IN $generos AND NOT EXISTS {
         MATCH (:Usuario {nombre: $usuario})-[:VIO]->(m)
     } AND NOT (m.titulo IN $pelis)
-    RETURN DISTINCT m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula as img
+    RETURN DISTINCT m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula as img,
+           EXISTS((:Usuario {nombre: $usuario})-[:QUIERE_VER]->(m)) AS quiere_ver
     ORDER BY rating DESC
     LIMIT 10
     """
     result = tx.run(query, usuario=usuario, generos=generos, pelis=pelis)
-    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"]} for record in result]
-
+    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"], "quiere_ver": record["quiere_ver"]} for record in result]
 # Peliculas de generos independientes
 def get_generos_mas_vistos_por_usuario(tx, usuario):
     query = """
@@ -133,12 +143,13 @@ def get_recomendaciones_para_ti(tx, usuario, generos_mas_vistos):
     WITH m, $generos_mas_vistos AS generos_mas_vistos, COLLECT(g.nombre) AS pelicula_generos
     WITH m, generos_mas_vistos, [gen IN generos_mas_vistos WHERE gen.genero IN pelicula_generos | gen.count] AS pesos
     WITH m, REDUCE(s = 0, p IN pesos | s + p) AS peso
-    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula AS img, COALESCE(peso, 0) AS peso
+    RETURN m.titulo AS title, m.calificacion_promedio AS rating, m.año AS año, m.caratula AS img, COALESCE(peso, 0) AS peso,
+           EXISTS((:Usuario {nombre: $usuario})-[:QUIERE_VER]->(m)) AS quiere_ver
     ORDER BY peso DESC, rating DESC
     LIMIT 10
     """
     result = tx.run(query, usuario=usuario, generos_mas_vistos=generos_mas_vistos)
-    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"], "peso": record["peso"]} for record in result]
+    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"], "peso": record["peso"], "quiere_ver": record["quiere_ver"]} for record in result]
 
 # Consulta para obtener todos los usuarios
 def get_all_users(tx):
@@ -159,6 +170,7 @@ def get_all_movies(tx):
     return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"]} for record in result]
 #   --- Login ---
 def verificar_usuario(tx, usuario, password):
+    
     query = """
     MATCH (u:Usuario {nombre: $usuario, passd: $password})
     RETURN u.nombre AS nombre, u.passd AS password
@@ -176,6 +188,13 @@ def create_quiere_ver(tx, nombre_usuario, titulo_pelicula):
     query = """
     MATCH (u:Usuario {nombre: $nombre_usuario}), (p:Pelicula {titulo: $titulo_pelicula})
     MERGE (u)-[:QUIERE_VER]->(p)
+    """
+    tx.run(query, nombre_usuario=nombre_usuario, titulo_pelicula=titulo_pelicula)
+
+def eliminar_quiere_ver(tx, nombre_usuario, titulo_pelicula):
+    query = """
+    MATCH (u:Usuario {nombre: $nombre_usuario})-[rel:QUIERE_VER]->(p:Pelicula {titulo: $titulo_pelicula})
+    DELETE rel
     """
     tx.run(query, nombre_usuario=nombre_usuario, titulo_pelicula=titulo_pelicula)
 
@@ -209,17 +228,22 @@ def login():
         with driver.session() as session:
             user = session.read_transaction(verificar_usuario, usuario, password)
             if user:
-                peliculas_vistas = session.read_transaction(get_peliculas_vistas, usuario)
-                peliculas_favoritas = session.read_transaction(get_peliculas_quiere_ver, usuario)
-                return jsonify({
-                    "usuario": {"nombre": user["nombre"], "password": user["password"]},
-                    "peliculasVistas": peliculas_vistas,
-                    "peliculasFavoritas": peliculas_favoritas
-                })
+                token = jwt.encode({
+                    'sub': usuario,
+                    'iat': datetime.datetime.utcnow(),
+                    'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+                }, SECRET_KEY, algorithm='HS256')
+                
+                return jsonify({"token": token, "usuario": usuario})
             else:
-                return jsonify({"error": "Credencdddiales inválidas"}), 401
+                return jsonify({"error": "Credenciales inválidas"}), 401
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/cerrar_sesion', methods=['POST'])
+def logout():
+    # In a real scenario, you might blacklist the token
+    return jsonify({"message": "Sesión cerrada exitosamente"})
 
 #   --- recomendaciones ---
 
@@ -409,6 +433,19 @@ def marcar_quiere_ver(usuario, titulo):
     try:
         with driver.session() as session:
             session.write_transaction(create_quiere_ver, usuario, titulo)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+    
+@app.route('/desmarcar_quiere_ver/<usuario>/<titulo>', methods=['POST'])
+def desmarcar_quiere_ver(usuario, titulo):
+
+    if not usuario or not titulo:
+        return jsonify({"success": False, "message": "Datos insuficientes."}), 400
+
+    try:
+        with driver.session() as session:
+            session.write_transaction(eliminar_quiere_ver, usuario, titulo)
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500

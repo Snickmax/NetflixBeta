@@ -9,25 +9,26 @@ function RegistroUsuario() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Construye los datos del nuevo usuario
       const formData = new FormData();
       formData.append('nombre', nombre);
       formData.append('email', email);
       formData.append('password', password);
       formData.append('edad', edad);
 
-      // Realiza la solicitud POST al endpoint /registro
-      await fetch('/registro', {
+      const response = await fetch('/registro', {
         method: 'POST',
         body: formData
       });
 
-      console.log('Usuario registrado exitosamente');
-      // Limpia los campos después del envío
-      setNombre('');
-      setEmail('');
-      setPassword('');
-      setEdad('');
+      if (response.ok) {
+        console.log('Usuario registrado exitosamente');
+        setNombre('');
+        setEmail('');
+        setPassword('');
+        setEdad('');
+      } else {
+        console.error('Error al registrar el usuario');
+      }
     } catch (error) {
       console.error('Error al registrar el usuario:', error);
     }

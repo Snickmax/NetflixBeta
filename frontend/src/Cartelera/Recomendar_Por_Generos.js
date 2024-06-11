@@ -84,6 +84,31 @@ function Recomendar_Por_Generos({ usuario }) {
       });
   };
 
+  const handleDesmarcarQuiereVer = (titulo) => {
+    if (!usuario) {
+      alert("Por favor, selecciona un usuario primero.");
+      return;
+    }
+
+    fetch(`/desmarcar_quiere_ver/${usuario}/${titulo}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(res => res.json())
+      .then(response => {
+        if (response.success) {
+          alert(`La película "${titulo}" ha sido agregada a tu lista.`);
+        } else {
+          alert(`No se pudo agregar la película "${titulo}" a tu lista.`);
+        }
+      })
+      .catch(error => {
+        alert(`Error: ${error.message}`);
+      });
+  };
+
   return (
     <div>
       {Object.keys(data).map((genero, j) => {
@@ -107,7 +132,21 @@ function Recomendar_Por_Generos({ usuario }) {
                         <h4>{movie.title} ({movie.año}) - Rating: {movie.rating}</h4>
                       </div>
                       <div className="buttons">
-                        <button className="button" onClick={() => handleMarcarQuiereVer(movie.title)}>Quiero Ver</button>
+                        {movie.quiere_ver ? (
+                      <button
+                        className="button"
+                        onClick={() => handleDesmarcarQuiereVer(movie.title)}
+                      >
+                        Quitar de Quiere ver
+                      </button>
+                    ) : (
+                      <button
+                        className="button"
+                        onClick={() => handleMarcarQuiereVer(movie.title)}
+                      >
+                        Quiero Ver
+                      </button>
+                    )}
                         <button className="button" onClick={() => handleMarcarComoVisto(movie.title)}>Ver</button>
                       </div>
                     </>
