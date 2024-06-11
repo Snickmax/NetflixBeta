@@ -1,6 +1,6 @@
 // PeliculasList.js
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 function PeliculasList({ usuario }) {
   const [data, setData] = useState([]);
@@ -9,17 +9,17 @@ function PeliculasList({ usuario }) {
 
   useEffect(() => {
     fetch("/peliculas")
-      .then(res => {
+      .then((res) => {
         if (!res.ok) {
-          throw new Error('Network response was not ok');
+          throw new Error("Network response was not ok");
         }
         return res.json();
       })
-      .then(data => {
+      .then((data) => {
         setData(data);
         setLoading(false);
       })
-      .catch(error => {
+      .catch((error) => {
         setError(error);
         setLoading(false);
       });
@@ -39,20 +39,20 @@ function PeliculasList({ usuario }) {
     }
 
     fetch(`/marcar_como_visto/${usuario.nombre}/${titulo}`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
-      }
+        "Content-Type": "application/json",
+      },
     })
-      .then(res => res.json())
-      .then(response => {
+      .then((res) => res.json())
+      .then((response) => {
         if (response.success) {
           alert(`La película "${titulo}" ha sido marcada como vista.`);
         } else {
           alert(`No se pudo marcar la película "${titulo}" como vista.`);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         alert(`Error: ${error.message}`);
       });
   };
@@ -64,20 +64,20 @@ function PeliculasList({ usuario }) {
     }
 
     fetch(`/marcar_quiere_ver/${usuario.nombre}/${titulo}`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
-      }
+        "Content-Type": "application/json",
+      },
     })
-      .then(res => res.json())
-      .then(response => {
+      .then((res) => res.json())
+      .then((response) => {
         if (response.success) {
           alert(`La película "${titulo}" ha sido agregada a tu lista.`);
         } else {
           alert(`No se pudo agregar la película "${titulo}" a tu lista.`);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         alert(`Error: ${error.message}`);
       });
   };
@@ -86,7 +86,7 @@ function PeliculasList({ usuario }) {
     <div>
       <h2>Cartelera Completa</h2>
       <div className="cartelera">
-      {data.map((movie, i) => (
+        {data.map((movie, i) => (
           <div key={i} className="movie">
             {movie.empty ? (
               <div className="empty-movie"></div>
@@ -99,8 +99,18 @@ function PeliculasList({ usuario }) {
                   </h3>
                 </div>
                 <div className="buttons">
-                  <button className="button" onClick={() => handleMarcarComoVisto(movie.title)}>Ver</button>
-                  <button className="button" onClick={() => handleMarcarQuiereVer(movie.title)}>Quiero Ver</button>
+                  <button
+                    className="button"
+                    onClick={() => handleMarcarComoVisto(movie.title)}
+                  >
+                    Ver
+                  </button>
+                  <button
+                    className="button"
+                    onClick={() => handleMarcarQuiereVer(movie.title)}
+                  >
+                    Quiero Ver
+                  </button>
                 </div>
               </>
             )}

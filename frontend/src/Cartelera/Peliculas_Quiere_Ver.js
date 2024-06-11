@@ -10,21 +10,27 @@ function PeliculasQuiereVer({ usuario }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch(`/quierever/${usuario}`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        setData(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        setError(error);
-        setLoading(false);
-      });
+    if (usuario) {
+      fetch(`/quierever/${usuario}`)
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return res.json();
+        })
+        .then((data) => {
+          setData(data);
+          setLoading(false);
+        })
+        .catch((error) => {
+          setError(error);
+          setLoading(false);
+        });
+    } else {
+      // Si el usuario es null, establece los datos como vacíos y detiene la carga
+      setData([]);
+      setLoading(false);
+    }
   }, [usuario]);
 
   if (loading) {
@@ -41,20 +47,20 @@ function PeliculasQuiereVer({ usuario }) {
     }
 
     fetch(`/marcar_como_visto/${usuario}/${titulo}`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
-      }
+        "Content-Type": "application/json",
+      },
     })
-      .then(res => res.json())
-      .then(response => {
+      .then((res) => res.json())
+      .then((response) => {
         if (response.success) {
           alert(`La película "${titulo}" ha sido marcada como vista.`);
         } else {
           alert(`No se pudo marcar la película "${titulo}" como vista.`);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         alert(`Error: ${error.message}`);
       });
   };
@@ -66,20 +72,20 @@ function PeliculasQuiereVer({ usuario }) {
     }
 
     fetch(`/marcar_quiere_ver/${usuario}/${titulo}`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
-      }
+        "Content-Type": "application/json",
+      },
     })
-      .then(res => res.json())
-      .then(response => {
+      .then((res) => res.json())
+      .then((response) => {
         if (response.success) {
           alert(`La película "${titulo}" ha sido agregada a tu lista.`);
         } else {
           alert(`No se pudo agregar la película "${titulo}" a tu lista.`);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         alert(`Error: ${error.message}`);
       });
   };
@@ -91,20 +97,20 @@ function PeliculasQuiereVer({ usuario }) {
     }
 
     fetch(`/desmarcar_quiere_ver/${usuario}/${titulo}`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
-      }
+        "Content-Type": "application/json",
+      },
     })
-      .then(res => res.json())
-      .then(response => {
+      .then((res) => res.json())
+      .then((response) => {
         if (response.success) {
-          alert(`La película "${titulo}" ha sido agregada a tu lista.`);
+          alert(`La película "${titulo}" ha sido quitada de tu lista.`);
         } else {
-          alert(`No se pudo agregar la película "${titulo}" a tu lista.`);
+          alert(`No se pudo quitar la película "${titulo}" de tu lista.`);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         alert(`Error: ${error.message}`);
       });
   };
@@ -132,21 +138,26 @@ function PeliculasQuiereVer({ usuario }) {
                 </div>
                 <div className="buttons">
                   {movie.quiere_ver ? (
-                      <button
-                        className="button"
-                        onClick={() => handleDesmarcarQuiereVer(movie.title)}
-                      >
-                        Quitar de Quiere ver
-                      </button>
-                    ) : (
-                      <button
-                        className="button"
-                        onClick={() => handleMarcarQuiereVer(movie.title)}
-                      >
-                        Quiero Ver
-                      </button>
-                    )}
-                  <button className="button" onClick={() => handleMarcarComoVisto(movie.title)}>Ver</button>
+                    <button
+                      className="button"
+                      onClick={() => handleDesmarcarQuiereVer(movie.title)}
+                    >
+                      Quitar de Quiere ver
+                    </button>
+                  ) : (
+                    <button
+                      className="button"
+                      onClick={() => handleMarcarQuiereVer(movie.title)}
+                    >
+                      Quiero Ver
+                    </button>
+                  )}
+                  <button
+                    className="button"
+                    onClick={() => handleMarcarComoVisto(movie.title)}
+                  >
+                    Ver
+                  </button>
                 </div>
               </>
             )}

@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import RegistroUsuario from './RegistroUsuario';
-import InicioSesion from './InicioSesion';
-import Home from './Home';
+import React, { useState, useEffect } from "react";
+import RegistroUsuario from "./RegistroUsuario";
+import InicioSesion from "./InicioSesion";
+import Home from "./Home";
 
 function App() {
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(localStorage.getItem("token"));
   const [usuario, setUsuario] = useState(null);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedUsuario = localStorage.getItem('usuario');
+    const storedToken = localStorage.getItem("token");
+    const storedUsuario = localStorage.getItem("usuario");
     if (storedToken) {
       setToken(storedToken);
     }
@@ -17,22 +17,20 @@ function App() {
       setUsuario(storedUsuario);
     }
   }, []);
-  
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('usuario');
+    localStorage.removeItem("token");
+    localStorage.removeItem("usuario");
     setToken(null);
     setUsuario(null);
   };
 
   const handleLogin = (data) => {
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('usuario', data.usuario);
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("usuario", data.usuario);
     setToken(data.token);
     setUsuario(data.usuario);
   };
-  
 
   return (
     <div>
@@ -43,7 +41,7 @@ function App() {
         </>
       ) : (
         <>
-          <Home usuario={usuario} handleLogout={handleLogout}/>
+          <Home usuario={usuario} handleLogout={handleLogout} />
         </>
       )}
     </div>

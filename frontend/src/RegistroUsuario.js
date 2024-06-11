@@ -1,36 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 function RegistroUsuario() {
-  const [nombre, setNombre] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [edad, setEdad] = useState('');
+  const [nombre, setNombre] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [edad, setEdad] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const formData = new FormData();
-      formData.append('nombre', nombre);
-      formData.append('email', email);
-      formData.append('password', password);
-      formData.append('edad', edad);
+      formData.append("nombre", nombre);
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("edad", edad);
 
-      const response = await fetch('/registro', {
-        method: 'POST',
-        body: formData
+      const response = await fetch("/registro", {
+        method: "POST",
+        body: formData,
       });
 
       if (response.ok) {
-        console.log('Usuario registrado exitosamente');
-        setNombre('');
-        setEmail('');
-        setPassword('');
-        setEdad('');
+        console.log("Usuario registrado exitosamente");
+        setNombre("");
+        setEmail("");
+        setPassword("");
+        setEdad("");
       } else {
-        console.error('Error al registrar el usuario');
+        console.error("Error al registrar el usuario");
       }
     } catch (error) {
-      console.error('Error al registrar el usuario:', error);
+      console.error("Error al registrar el usuario:", error);
     }
   };
 

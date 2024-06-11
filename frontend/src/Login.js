@@ -1,33 +1,29 @@
 import React, { useState } from "react";
 
-function InicioSesion({ setToken }) {
+function Login({ setToken }) {
   const [usuario, setUsuario] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const formData = new FormData();
-      formData.append("usuario", usuario);
-      formData.append("password", password);
-
-      const response = await fetch("/Inicio", {
+      const response = await fetch("/inicio", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ usuario, password }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setToken(data); // Suponiendo que el backend devuelve un token
-
-        console.log("Inicio de sesión exitoso");
-        setUsuario(data.usuario);
-        setPassword("");
+      const data = await response.json();
+      if (data.token) {
+        setToken(data.token);
+        alert("Inicio de sesión exitoso");
       } else {
-        console.error("Error en el inicio de sesión");
+        alert("Credenciales inválidas");
       }
     } catch (error) {
-      console.error("Error en el inicio de sesión:", error);
+      alert(`Error: ${error.message}`);
     }
   };
 
@@ -61,4 +57,4 @@ function InicioSesion({ setToken }) {
   );
 }
 
-export default InicioSesion;
+export default Login;
