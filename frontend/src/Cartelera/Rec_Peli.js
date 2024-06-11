@@ -27,7 +27,7 @@ function Rec_Peli({ usuario }) {
     } else {
       // Si el usuario es null, establece los datos como vacíos y detiene la carga
       setData([]);
-      setLoading(false);
+      setLoading(true);
     }
   }, [usuario]);
 

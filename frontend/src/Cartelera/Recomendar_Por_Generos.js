@@ -29,7 +29,7 @@ function Recomendar_Por_Generos({ usuario }) {
     } else {
       // Si el usuario es null, establece los datos como vacíos y detiene la carga
       setData([]);
-      setLoading(false);
+      setLoading(true);
     }
   }, [usuario]);
 
