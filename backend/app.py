@@ -161,13 +161,14 @@ def get_all_users(tx):
     return [{"nombre": record["nombre"]} for record in result]
 
 # Consulta para obtener todos los usuarios
-def get_all_movies(tx):
+def get_all_movies(tx, usuario):
     query = """
     MATCH (m:Pelicula)
-    RETURN m.titulo AS title, m.año AS año, m.calificacion_promedio AS rating, m.caratula as img
+    RETURN m.titulo AS title, m.año AS año, m.calificacion_promedio AS rating, m.caratula as img,
+           EXISTS((:Usuario {nombre: $usuario})-[:QUIERE_VER]->(m)) AS quiere_ver
     """
-    result = tx.run(query)
-    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"]} for record in result]
+    result = tx.run(query, usuario=usuario)
+    return [{"title": record["title"], "rating": record["rating"], "año": record["año"], "img": record["img"], "quiere_ver": record["quiere_ver"]} for record in result]
 #   --- Login ---
 def verificar_usuario(tx, usuario, password):
     
@@ -400,11 +401,14 @@ def obtener_usuarios():
         return jsonify({"error": str(e)}), 500
     
 # Ruta para obtener todas las películas
-@app.route('/peliculas', methods=['GET'])
-def obtener_peliculas():
+@app.route('/peliculas/<usuario>', methods=['GET'])
+def obtener_peliculas(usuario):
+    if not usuario:
+        return jsonify({"error": "Usuario o título de película no proporcionado"}), 400
+    
     try:
         with driver.session() as session:
-            peliculas = session.read_transaction(get_all_movies)
+            peliculas = session.read_transaction(get_all_movies, usuario)
             return jsonify(peliculas)
     except Exception as e:
         return jsonify({"error": str(e)}), 500

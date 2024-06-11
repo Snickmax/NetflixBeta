@@ -7,6 +7,7 @@ import PeliculasList from "./PeliculasList";
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [usuario, setUsuario] = useState(null);
+  const [mostrarPeliculas, setMostrarPeliculas] = useState(false);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -18,6 +19,14 @@ function App() {
       setUsuario(storedUsuario);
     }
   }, []);
+
+  const handleMostrarPeliculasClick = () => {
+    setMostrarPeliculas(true);
+  };
+
+  const handleVolverInicioClick = () => {
+    setMostrarPeliculas(false);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -42,9 +51,29 @@ function App() {
         </>
       ) : (
         <>
-          <Home usuario={usuario} handleLogout={handleLogout} />
+        <header>
+        <h1>Bienvenido {usuario} a nuestra Página de Recomendaciones</h1>
+        <button onClick={handleLogout}>Cerrar Sesión</button>
+        {mostrarPeliculas ? (
+          <button onClick={handleVolverInicioClick}>HOME</button>
+        ) : (
+          <button onClick={handleMostrarPeliculasClick}>Cartelera</button>
+        )}
+      </header>
+          {mostrarPeliculas ? (
+            <PeliculasList
+              usuario={usuario}
+            />
+          ) : (
+            <Home
+              usuario={usuario}
+            />
+          )}
         </>
       )}
+      <footer>
+        <p>© 2024 Mi Sitio de Recomendaciones</p>
+      </footer>
     </div>
   );
 }

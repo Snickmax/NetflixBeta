@@ -54,7 +54,12 @@ function NuevosLanzamientos({ usuario }) {
       .then((res) => res.json())
       .then((response) => {
         if (response.success) {
-          alert(`La película "${titulo}" ha sido marcada como vista.`);
+          const confirmReload = window.confirm(
+            `La película "${titulo}" ha sido marcada como vista. ¿Quieres reiniciar para visualizar los cambios?`
+          );
+          if (confirmReload) {
+            window.location.reload(); // Reiniciar la página
+          }
         } else {
           alert(`No se pudo marcar la película "${titulo}" como vista.`);
         }
@@ -79,7 +84,12 @@ function NuevosLanzamientos({ usuario }) {
       .then((res) => res.json())
       .then((response) => {
         if (response.success) {
-          alert(`La película "${titulo}" ha sido agregada a tu lista.`);
+          const confirmReload = window.confirm(
+            `La película "${titulo}" ha sido agregada a tu lista. ¿Quieres reiniciar para visualizar los cambios?`
+          );
+          if (confirmReload) {
+            window.location.reload(); // Reiniciar la página
+          }
         } else {
           alert(`No se pudo agregar la película "${titulo}" a tu lista.`);
         }
@@ -104,7 +114,12 @@ function NuevosLanzamientos({ usuario }) {
       .then((res) => res.json())
       .then((response) => {
         if (response.success) {
-          alert(`La película "${titulo}" ha sido quitada de tu lista.`);
+          const confirmReload = window.confirm(
+            `La película "${titulo}" ha sido quitada de tu lista. ¿Quieres reiniciar para visualizar los cambios?`
+          );
+          if (confirmReload) {
+            window.location.reload(); // Reiniciar la página
+          }
         } else {
           alert(`No se pudo quitar la película "${titulo}" de tu lista.`);
         }
