@@ -72,10 +72,6 @@ function Main() {
   const handleVolverInicioClick = () => {
     setMostrarPeliculas(false);
     setMostrarRegistro(false);
-    setSelectedUsuario(null);
-    localStorage.removeItem('selectedUsuario');
-    const newUrl = window.location.pathname;
-    window.history.pushState({}, '', newUrl);
   };
 
   const handleRegistroSuccess = () => {

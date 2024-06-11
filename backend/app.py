@@ -171,6 +171,21 @@ def create_usuario(tx, hnombre_usuario, hedad, hemail, hfecha_registro, hpass):
     tx.run("MERGE (u:Usuario {nombre: $nombre, edad: $edad, email: $email, fecha_registro: $fecha_registro, passd: $passd})",
            nombre=hnombre_usuario, edad=hedad, email=hemail, fecha_registro=hfecha_registro, passd=hpass)
 
+# CRUD Peliculas
+def create_quiere_ver(tx, nombre_usuario, titulo_pelicula):
+    query = """
+    MATCH (u:Usuario {nombre: $nombre_usuario}), (p:Pelicula {titulo: $titulo_pelicula})
+    MERGE (u)-[:QUIERE_VER]->(p)
+    """
+    tx.run(query, nombre_usuario=nombre_usuario, titulo_pelicula=titulo_pelicula)
+
+def create_visto(tx, nombre_usuario, titulo_pelicula):
+    query = """
+    MATCH (u:Usuario {nombre: $nombre_usuario}), (p:Pelicula {titulo: $titulo_pelicula})
+    MERGE (u)-[:VIO]->(p)
+    """
+    tx.run(query, nombre_usuario=nombre_usuario, titulo_pelicula=titulo_pelicula)
+
 @app.route('/registro', methods=['POST'])
 def registro():
     nombre = request.form['nombre']
@@ -291,7 +306,7 @@ def recomendar_por_generos(usuario):
             
             recomendaciones = {}
             for genero in generos_mas_vistos:
-                peliculas_recomendadas = session.read_transaction(recomendar_peliculas_generos_independientes, usuario, [genero])
+                peliculas_recomendadas = session.read_transaction(recomendar_peliculas_generos_independientes, usuario, [genero],[])
                 if peliculas_recomendadas:
                     recomendaciones[genero] = peliculas_recomendadas
 
@@ -370,12 +385,6 @@ def obtener_peliculas():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-def create_visto(tx, nombre_usuario, titulo_pelicula):
-    query = """
-    MATCH (u:Usuario {nombre: $nombre_usuario}), (p:Pelicula {titulo: $titulo_pelicula})
-    MERGE (u)-[:VIO]->(p)
-    """
-    tx.run(query, nombre_usuario=nombre_usuario, titulo_pelicula=titulo_pelicula)
 
 @app.route('/marcar_como_visto/<usuario>/<titulo>', methods=['POST'])
 def marcar_como_visto(usuario, titulo):
@@ -390,12 +399,6 @@ def marcar_como_visto(usuario, titulo):
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
     
-def create_quiere_ver(tx, nombre_usuario, titulo_pelicula):
-    query = """
-    MATCH (u:Usuario {nombre: $nombre_usuario}), (p:Pelicula {titulo: $titulo_pelicula})
-    MERGE (u)-[:QUIERE_VER]->(p)
-    """
-    tx.run(query, nombre_usuario=nombre_usuario, titulo_pelicula=titulo_pelicula)
 
 @app.route('/marcar_quiere_ver/<usuario>/<titulo>', methods=['POST'])
 def marcar_quiere_ver(usuario, titulo):

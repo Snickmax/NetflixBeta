@@ -18,3 +18,4 @@ conectar backend frontend:
 
 para instalar reuirements:
 pip install -r requirements.txt
+npm install react-slick slick-carousel

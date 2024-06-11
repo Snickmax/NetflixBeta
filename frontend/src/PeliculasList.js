@@ -25,6 +25,13 @@ function PeliculasList({ usuario }) {
       });
   }, []);
 
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return;
+  }
   const handleMarcarComoVisto = (titulo) => {
     if (!usuario) {
       alert("Por favor, selecciona un usuario primero.");
@@ -75,24 +82,28 @@ function PeliculasList({ usuario }) {
       });
   };
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  if (error) {
-    return;
-  }
-
   return (
     <div>
       <h2>Cartelera Completa</h2>
       <div className="cartelera">
-        {data.map((movie, i) => (
+      {data.map((movie, i) => (
           <div key={i} className="movie">
-            <h3>{movie.title} {movie.año} ({movie.rating})</h3>
-            <img src={movie.img} alt={movie.title} style={{ width: '200px', height: '300px' }} />
-            <button onClick={() => handleMarcarComoVisto(movie.title)}>Marcar como visto</button>
-            <button onClick={() => handleMarcarQuiereVer(movie.title)}>Agregar a tu lista</button>
+            {movie.empty ? (
+              <div className="empty-movie"></div>
+            ) : (
+              <>
+                <img src={movie.img} alt={movie.title} />
+                <div className="movie-title">
+                  <h3>
+                    {movie.title} {movie.año} ({movie.rating})
+                  </h3>
+                </div>
+                <div className="buttons">
+                  <button className="button" onClick={() => handleMarcarComoVisto(movie.title)}>Ver</button>
+                  <button className="button" onClick={() => handleMarcarQuiereVer(movie.title)}>Quiero Ver</button>
+                </div>
+              </>
+            )}
           </div>
         ))}
       </div>
