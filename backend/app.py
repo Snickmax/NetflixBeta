@@ -19,9 +19,6 @@ neo4j_uri = os.getenv("NEO4J_URI")
 neo4j_user = os.getenv("NEO4J_USER")
 neo4j_password = os.getenv("NEO4J_PASSWORD")
 
-# Configuración JWT
-SECRET_KEY = os.getenv("SECRET_KEY", "papupro")
-
 # Crear una instancia de Driver para interactuar con la base de datos Neo4j
 driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_user, neo4j_password))
 
@@ -52,7 +49,7 @@ def login():
                     'sub': usuario,
                     'iat': datetime.datetime.utcnow(),
                     'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
-                }, SECRET_KEY, algorithm='HS256')
+                }, algorithm='HS256')
                 
                 return jsonify({"token": token, "usuario": usuario})
             else:
